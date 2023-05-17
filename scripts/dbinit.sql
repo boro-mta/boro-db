@@ -62,3 +62,37 @@ CREATE TABLE Reservations (
 
 GO
 
+CREATE FUNCTION dbo.IsLocationInRadius(@longitude1 FLOAT,
+    @latitude1 FLOAT,
+    @longitude2 FLOAT,
+    @latitude2 FLOAT,
+    @radius FLOAT)
+RETURNS BIT
+AS
+BEGIN
+    DECLARE @result BIT;
+    DECLARE @distance FLOAT;
+    DECLARE @earthRadius FLOAT;
+    SET @earthRadius = 6371000;
+
+    DECLARE @dLat FLOAT, @dLon FLOAT, @a FLOAT, @c FLOAT;
+
+    SET @dLat = (@latitude1 - @latitude2) * PI() / 180;
+    SET @dLon = (@longitude1 - @longitude2) * PI() / 180;
+
+    SET @a = SIN(@dLat / 2) * SIN(@dLat / 2) +
+              COS((@latitude1) * PI() / 180) * COS((@latitude2) * PI() / 180) *
+              SIN(@dLon / 2) * SIN(@dLon / 2);
+
+    SET @c = 2 * ATN2(SQRT(@a), SQRT(1 - @a));
+
+    SET @distance = @earthRadius * @c;
+    IF (@distance <= @radius)
+        SET @result = 1;
+    ELSE
+        SET @result = 0;
+    
+    RETURN @result;
+END
+
+GO
