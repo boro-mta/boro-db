@@ -62,6 +62,15 @@ CREATE TABLE Reservations (
 
 GO
 
+CREATE TABLE BlockedDates (
+    ItemId UNIQUEIDENTIFIER NOT NULL,
+    Date DATETIME NOT NULL,
+    CONSTRAINT PK_BlockedDates PRIMARY KEY CLUSTERED (ItemId, Date),
+    CONSTRAINT FK_BlockedDates_Items FOREIGN KEY (ItemId) REFERENCES Items(ItemId)
+);
+
+GO
+
 CREATE FUNCTION dbo.IsLocationInRadius(@longitude1 FLOAT,
     @latitude1 FLOAT,
     @longitude2 FLOAT,
