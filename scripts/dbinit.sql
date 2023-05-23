@@ -16,7 +16,9 @@ CREATE TABLE Users (
     About NVARCHAR(MAX) NOT NULL,
     DateJoined DATETIME NOT NULL,
     Latitude FLOAT NOT NULL,
-    Longitude FLOAT NOT NULL
+    Longitude FLOAT NOT NULL,
+    ImageId UNIQUEIDENTIFIER NULL,
+    CONSTRAINT FK_Users_UserImages FOREIGN KEY (ImageId) REFERENCES UserImages(ImageId)
 );
 
 GO
