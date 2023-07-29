@@ -110,7 +110,6 @@ END
 
 GO
 
-ALTER TABLE Users ADD CONSTRAINT FK_Users_UserImages FOREIGN KEY (ImageId) REFERENCES UserImages(ImageId);
 ALTER TABLE UserImages ADD CONSTRAINT FK_UserImages_Users FOREIGN KEY (UserId) REFERENCES Users(UserId);
 ALTER TABLE ItemImages ADD CONSTRAINT FK_ItemImages_Items FOREIGN KEY (ItemId) REFERENCES Items(ItemId);
 ALTER TABLE Reservations ADD CONSTRAINT FK_Reservations_Items FOREIGN KEY (ItemId) REFERENCES Items(ItemId);
