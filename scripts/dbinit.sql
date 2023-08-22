@@ -128,6 +128,63 @@ END
 
 GO
 
+CREATE TABLE Scoreboards (
+    UserId UNIQUEIDENTIFIER PRIMARY KEY,
+    AmountOfItems INT NOT NULL,
+    AmountOfLendings INT NOT NULL,
+    AmountOfBorrowings INT NOT NULL,
+    TotalScore INT NOT NULL
+);
+
+GO
+
+CREATE OR ALTER PROCEDURE UpsertAndCalculateTotalScore
+    @userId UNIQUEIDENTIFIER
+AS
+BEGIN
+    DECLARE @AmountOfItems INT;
+    DECLARE @AmountOfBorrowings INT;
+    DECLARE @AmountOfLendings INT;
+	DECLARE @TotalScore INT;
+
+    SELECT
+        @AmountOfBorrowings = COUNT(*) FROM Reservations WHERE BorrowerId = @userId AND Status = 10;
+    SELECT
+        @AmountOfLendings = COUNT(*) FROM Reservations WHERE LenderId = @userId AND Status = 10;
+    SELECT
+        @AmountOfItems = COUNT(*) FROM Items WHERE OwnerId = @userId;
+
+	SET	
+		@TotalScore = @AmountOfItems * 100 + @AmountOfBorrowings * 50 + @AmountOfLendings * 200
+
+    DECLARE @UpdatedEntry TABLE (
+        UserId UNIQUEIDENTIFIER,
+        AmountOfItems INT,
+        AmountOfBorrowings INT,
+        AmountOfLendings INT,
+        TotalScore INT
+    );
+
+    MERGE INTO Scoreboards AS target
+    USING (VALUES (@userId)) AS source (UserId)
+    ON target.UserId = source.UserId
+    WHEN MATCHED THEN
+        UPDATE SET
+            AmountOfItems = @AmountOfItems,
+            AmountOfBorrowings = @AmountOfBorrowings,
+            AmountOfLendings = @AmountOfLendings,
+            TotalScore = @TotalScore
+    WHEN NOT MATCHED THEN
+        INSERT (UserId, AmountOfItems, AmountOfBorrowings, AmountOfLendings, TotalScore)
+        VALUES (@userId, @AmountOfItems, @AmountOfBorrowings, @AmountOfLendings, @TotalScore)
+    OUTPUT INSERTED.UserId, INSERTED.AmountOfItems, INSERTED.AmountOfBorrowings, INSERTED.AmountOfLendings, INSERTED.TotalScore
+    INTO @UpdatedEntry;
+
+    SELECT * FROM @UpdatedEntry;
+END;
+
+GO
+
 ALTER TABLE UserImages ADD CONSTRAINT FK_UserImages_Users FOREIGN KEY (UserId) REFERENCES Users(UserId);
 ALTER TABLE SendBirdUsers ADD CONSTRAINT FK_SendBirdUsers_Users FOREIGN KEY (BoroUserId) REFERENCES Users(UserId);
 ALTER TABLE ItemImages ADD CONSTRAINT FK_ItemImages_Items FOREIGN KEY (ItemId) REFERENCES Items(ItemId);
