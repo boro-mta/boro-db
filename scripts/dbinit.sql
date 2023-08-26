@@ -155,7 +155,7 @@ BEGIN
         @AmountOfItems = COUNT(*) FROM Items WHERE OwnerId = @userId;
 
 	SET	
-		@TotalScore = @AmountOfItems * 100 + @AmountOfBorrowings * 50 + @AmountOfLendings * 200
+		@TotalScore = @AmountOfItems * 100 + @AmountOfBorrowings * 300 + @AmountOfLendings * 500
 
     DECLARE @UpdatedEntry TABLE (
         UserId UNIQUEIDENTIFIER,
